@@ -15,48 +15,65 @@ class Item {
   bool isExpanded;
 }
 
-List<ExpansionTile> generatePlayerItemList(List<Player> allPlayers) {
+List<ExpansionTile> generatePlayerItemList(
+    List<Player> allPlayers, BuildContext context) {
+  final itemHeight = MediaQuery.of(context).size.height;
+  final itemWidth = MediaQuery.of(context).size.width;
+
+  var getGridItem = (String key, String value) {
+    return [
+      Align(
+          alignment: Alignment.centerLeft,
+          child: FittedBox(
+              child: Text(
+            key,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ))),
+      Align(
+          alignment: Alignment.centerLeft,
+          child: FittedBox(child: Text(value))),
+    ];
+  };
+
   return allPlayers.asMap().entries.map<ExpansionTile>((player) {
     return ExpansionTile(
       title: Text(player.value.name),
+      initiallyExpanded: player.value.name == "Cody Stammer" ? true : false,
       children: [
-        ListTile(
-          // leading: Padding(padding: EdgeInsets.fromLTRB(5, 0, 0, 10)),
-          title: SingleChildScrollView(
-            child: Column(
-              // https://stackoverflow.com/questions/51638176/under-which-circumstances-textalign-property-works-in-flutter
-              children: [
-                player.value.preferredCourtLocation != ""
-                    ? SizedBox(
-                        width: double.infinity,
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Text('Preferred Courts: '),
-                              ),
-                              Expanded(
-                                  child: Text(
-                                      player.value.preferredCourtLocation)),
-                            ]),
-                      )
-                    : Container(),
-                SizedBox(
-                  width: double.infinity,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(child: Text('Availability: ')),
-                      Expanded(child: Text(player.value.availability))
-                    ],
-                  ),
-                )
-              ],
-            ),
+        // SingleChildScrollView(child: Row(children: [Text('hi'), Text('hi')]))
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: 550,
+            maxWidth: 1200,
           ),
-          trailing: Text(player.value.phone),
-          // should figure out how to do this w/o intrinsic width
-        ),
+          child: GridView.count(
+            shrinkWrap: true,
+            physics: ClampingScrollPhysics(),
+            crossAxisCount: () {
+              if (itemWidth > 1000)
+                return 4;
+              else if (itemWidth > 550)
+                return 2;
+              else
+                return 1;
+            }(),
+            padding: const EdgeInsets.all(20.0),
+            crossAxisSpacing: .5,
+
+            // https://stackoverflow.com/questions/48405123/how-to-set-custom-height-for-widget-in-gridview-in-flutter
+            childAspectRatio:
+                itemWidth > 1200 ? 10 / 1 : itemHeight * 7 / itemWidth,
+            children: [
+              // ...getGridItem(itemWidth.toString(), itemHeight.toString()),
+              ...getGridItem("Preferred Court Location: ",
+                  player.value.preferredCourtLocation),
+              ...getGridItem("Availability: ", player.value.availability),
+              ...getGridItem("Email: ", player.value.email),
+              ...getGridItem("Phone: ", player.value.skillLevel),
+              ...getGridItem("Skill Level: ", player.value.skillLevel)
+            ],
+          ),
+        )
       ],
     );
   }).toList();
@@ -72,11 +89,11 @@ class LeaderBoard extends StatefulWidget {
 
 /// This is the private State class that goes with LeaderBoard.
 class _LeaderBoardState extends State<LeaderBoard> {
-  final List<ExpansionTile> _data =
-      generatePlayerItemList(allPlayerData.players);
+  List<ExpansionTile> _data = [];
 
   @override
   Widget build(BuildContext context) {
+    this._data = generatePlayerItemList(allPlayerData.players, context);
     return SingleChildScrollView(
       child: Container(
         child: _buildPanel(),
@@ -91,7 +108,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
           title: Text("Stonewall Tennis 2021 Leaderboard"),
           centerTitle: true,
         ),
-        ..._data
+        ..._data,
       ],
     );
   }
