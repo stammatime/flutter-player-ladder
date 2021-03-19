@@ -24,14 +24,13 @@ List<ExpansionTile> generatePlayerItemList(
     return [
       Align(
           alignment: Alignment.centerLeft,
-          child: FittedBox(
-              child: Text(
+          child: Text(
             key,
             style: TextStyle(fontWeight: FontWeight.bold),
-          ))),
+          )),
       Align(
           alignment: Alignment.centerLeft,
-          child: FittedBox(child: Text(value))),
+          child: Text(value)),
     ];
   };
 
