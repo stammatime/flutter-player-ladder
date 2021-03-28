@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'models/player.dart';
-import './models/playerData.dart' as allData;
+// import './models/playerData.dart' as allData;
+import 'package:http/http.dart' as http;
 
 // stores ExpansionPanel state information
 class Item {
@@ -13,6 +16,18 @@ class Item {
   Widget expandedValue;
   Widget headerValue;
   bool isExpanded;
+}
+
+Future<List<Player>> fetchPlayers() async {
+  final response = await http.get(Uri.https(
+      'c2y956330l.execute-api.us-east-1.amazonaws.com', 'production/players'));
+
+  List playersJson = jsonDecode(response.body);
+
+  List<Player> playerList =
+      playersJson.map((player) => Player.fromJson(player)).toList();
+
+  return Future.value(playerList);
 }
 
 List<ExpansionTile> generatePlayerItemList(
@@ -39,7 +54,7 @@ List<ExpansionTile> generatePlayerItemList(
             children: [
               Expanded(
                 child: SelectableText(
-                  value,
+                  value ?? "",
                   onTap: () {
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   },
@@ -100,7 +115,6 @@ List<ExpansionTile> generatePlayerItemList(
                 return itemHeight * 6 / itemWidth;
             }(),
             children: [
-              // ...getGridItem(itemWidth.toString(), itemHeight.toString()),
               ...getGridItem("Email: ", player.value.email),
               ...getGridItem("Phone: ", player.value.phone),
               ...getGridItem("Preferred Court Location: ",
@@ -125,16 +139,54 @@ class LeaderBoard extends StatefulWidget {
 
 /// This is the private State class that goes with LeaderBoard.
 class _LeaderBoardState extends State<LeaderBoard> {
-  List<ExpansionTile> _data = [];
+  List<ExpansionTile> _playerTiles = [];
+  List<Player> allPlayers = [];
 
   @override
   Widget build(BuildContext context) {
-    this._data = generatePlayerItemList(allData.players, context);
-    return SingleChildScrollView(
-      child: Container(
-        child: _buildPanel(),
-      ),
-    );
+    return FutureBuilder(
+        future: fetchPlayers(),
+        builder: (BuildContext context, AsyncSnapshot<List<Player>> snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return loadingWidget();
+          } else {
+            if (snapshot.hasError)
+              return Center(child: Text('Error: ${snapshot.error}'));
+            else {
+              this._playerTiles =
+                  generatePlayerItemList(snapshot.data, context);
+              return SingleChildScrollView(
+                child: Container(
+                  child: _buildPanel(),
+                ),
+              );
+            }
+          }
+        });
+    // return SingleChildScrollView(
+    //   child: Container(
+    //     child: _buildPanel(),
+    //   ),
+    // );
+  }
+
+  Widget loadingWidget() {
+    return Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: <Widget>[
+            Text(
+              'Retrieving Players',
+              style: Theme.of(context).textTheme.headline6,
+            ),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(
+              value: null,
+              semanticsLabel: 'Linear progress indicator',
+            ),
+          ],
+        ));
   }
 
   Widget _buildPanel() {
@@ -144,7 +196,7 @@ class _LeaderBoardState extends State<LeaderBoard> {
           title: Text("Stonewall Tennis 2021 Leaderboard"),
           centerTitle: true,
         ),
-        ..._data,
+        ..._playerTiles,
       ],
     );
   }
