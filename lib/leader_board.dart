@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'models/player.dart';
-// import './models/playerData.dart' as allData;
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 
 // stores ExpansionPanel state information
 class Item {
@@ -56,6 +56,7 @@ List<ExpansionTile> generatePlayerItemList(
                 child: SelectableText(
                   value ?? "",
                   onTap: () {
+                    Clipboard.setData(ClipboardData(text: value));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   },
                 ),
@@ -67,6 +68,7 @@ List<ExpansionTile> generatePlayerItemList(
                   iconSize: 16,
                   splashRadius: 18,
                   onPressed: () {
+                    Clipboard.setData(ClipboardData(text: value));
                     ScaffoldMessenger.of(context).showSnackBar(snackBar);
                   },
                 ),
@@ -115,12 +117,13 @@ List<ExpansionTile> generatePlayerItemList(
                 return itemHeight * 6 / itemWidth;
             }(),
             children: [
+              ...getGridItem("id: ", player.value.id),
               ...getGridItem("Email: ", player.value.email),
               ...getGridItem("Phone: ", player.value.phone),
               ...getGridItem("Preferred Court Location: ",
                   player.value.preferredCourtLocation),
               ...getGridItem("Availability: ", player.value.availability),
-              ...getGridItem("Skill Level: ", player.value.skillLevel)
+              ...getGridItem("Skill Level: ", player.value.skillLevel),
             ],
           ),
         )

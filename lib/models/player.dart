@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 
 class Player {
   Player(
-      {@required id,
+      {@required this.id,
       @required this.name,
       @required this.email,
       this.preferredCourtLocation = "",
