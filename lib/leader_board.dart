@@ -75,7 +75,7 @@ List<ExpansionTile> generatePlayerItemList(
           )),
     ];
 
-    return value == "" ? [] : row;
+    return value == "" || value == null ? [] : row;
   };
 
   return allPlayers.asMap().entries.map<ExpansionTile>((player) {
