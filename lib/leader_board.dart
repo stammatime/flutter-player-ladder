@@ -141,11 +141,20 @@ class LeaderBoard extends StatefulWidget {
 class _LeaderBoardState extends State<LeaderBoard> {
   List<ExpansionTile> _playerTiles = [];
   List<Player> allPlayers = [];
+  Future<List<Player>> _futureGetPlayers;
+
+  @override
+  void initState() {
+    // if we don't define this to be ran once, it will run every render
+    // https://flutterigniter.com/future-async-called-multiple-times/
+    _futureGetPlayers = fetchPlayers();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: fetchPlayers(),
+        future: _futureGetPlayers,
         builder: (BuildContext context, AsyncSnapshot<List<Player>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return loadingWidget();
@@ -163,11 +172,6 @@ class _LeaderBoardState extends State<LeaderBoard> {
             }
           }
         });
-    // return SingleChildScrollView(
-    //   child: Container(
-    //     child: _buildPanel(),
-    //   ),
-    // );
   }
 
   Widget loadingWidget() {
