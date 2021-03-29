@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:leaderboard_ladder/leader_board.dart';
 import 'package:leaderboard_ladder/rules.dart';
 import 'package:leaderboard_ladder/events.dart';
+import 'package:leaderboard_ladder/admin.dart';
 
 void main() {
   runApp(MyApp());
@@ -20,7 +21,7 @@ class MyApp extends StatelessWidget {
                 headline6: TextStyle(color: Colors.white, fontSize: 20))),
       ),
       home: DefaultTabController(
-        length: 3,
+        length: 4,
         initialIndex: 0,
         child: Scaffold(
           appBar: AppBar(
@@ -33,11 +34,17 @@ class MyApp extends StatelessWidget {
                     icon: Icon(Icons.sports_tennis_rounded)),
                 Tab(text: "Rules", icon: Icon(Icons.rule_rounded)),
                 Tab(text: "Upcoming Events", icon: Icon(Icons.calendar_today)),
+                Tab(text: "Admin", icon: Icon(Icons.admin_panel_settings))
               ],
             ),
           ),
           body: TabBarView(
-            children: [LeaderBoardPage(), RulesPage(), EventsPage()],
+            children: [
+              LeaderBoardPage(),
+              RulesPage(),
+              EventsPage(),
+              AdminPage()
+            ],
           ),
         ),
       ),
@@ -55,6 +62,20 @@ class RulesPage extends StatelessWidget {
           vertical: screenSize.height * .02),
       child: Center(
           child: Container(width: screenSize.width * .8, child: Rules())),
+    );
+  }
+}
+
+class AdminPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var screenSize = MediaQuery.of(context).size;
+    return Padding(
+      padding: EdgeInsets.symmetric(
+          horizontal: screenSize.height * .05,
+          vertical: screenSize.height * .02),
+      child: Center(
+          child: Container(width: screenSize.width * .8, child: Admin())),
     );
   }
 }

@@ -1,22 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'models/player.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/services.dart';
-
-// stores ExpansionPanel state information
-class Item {
-  Item({
-    @required this.expandedValue,
-    @required this.headerValue,
-    this.isExpanded = false,
-  });
-
-  Widget expandedValue;
-  Widget headerValue;
-  bool isExpanded;
-}
+import './player_list.dart';
+import './player_details.dart';
 
 Future<List<Player>> fetchPlayers() async {
   final response = await http.get(Uri.https(
@@ -30,108 +18,6 @@ Future<List<Player>> fetchPlayers() async {
   return Future.value(playerList);
 }
 
-List<ExpansionTile> generatePlayerItemList(
-    List<Player> allPlayers, BuildContext context) {
-  final itemHeight = MediaQuery.of(context).size.height;
-  final itemWidth = MediaQuery.of(context).size.width;
-
-  var getGridItem = (String key, String value) {
-    final snackBar = SnackBar(
-      content: Text("$value copied to clipboard"),
-    );
-    var row = [
-      Align(
-          alignment: Alignment.centerLeft,
-          child: Text(
-            key,
-            style: TextStyle(fontWeight: FontWeight.bold),
-          )),
-      Align(
-          alignment: Alignment.centerLeft,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SelectableText(
-                  value ?? "",
-                  onTap: () {
-                    Clipboard.setData(ClipboardData(text: value));
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  },
-                ),
-              ),
-              FittedBox(
-                child: IconButton(
-                  icon: Icon(Icons.copy),
-                  color: Colors.grey,
-                  iconSize: 16,
-                  splashRadius: 18,
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: value));
-                    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-                  },
-                ),
-              )
-            ],
-          )),
-    ];
-
-    return value == "" || value == null ? [] : row;
-  };
-
-  return allPlayers.asMap().entries.map<ExpansionTile>((player) {
-    var rank = player.key + 1;
-    return ExpansionTile(
-      title: Text("$rank ${player.value.name}"),
-      initiallyExpanded: player.value.name == "Cody Stammer" ? true : false,
-      children: [
-        // SingleChildScrollView(child: Row(children: [Text('hi'), Text('hi')]))
-        ConstrainedBox(
-          constraints: BoxConstraints(
-            minWidth: 550,
-            maxWidth: 1200,
-          ),
-          child: GridView.count(
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            crossAxisCount: () {
-              if (itemWidth > 1000)
-                return 4;
-              else if (itemWidth > 550)
-                return 2;
-              else
-                return 1;
-            }(),
-            padding: const EdgeInsets.all(20.0),
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 5,
-
-            // https://stackoverflow.com/questions/48405123/how-to-set-custom-height-for-widget-in-gridview-in-flutter
-            childAspectRatio: () {
-              if (itemWidth > 1200)
-                return 10 / 1;
-              else if (itemWidth > 550)
-                return itemHeight * 5 / itemWidth;
-              else
-                return itemHeight * 6 / itemWidth;
-            }(),
-            children: [
-              ...getGridItem("id: ", player.value.id),
-              ...getGridItem("Email: ", player.value.email),
-              ...getGridItem("Phone: ", player.value.phone),
-              ...getGridItem("Preferred Court Location: ",
-                  player.value.preferredCourtLocation),
-              ...getGridItem("Availability: ", player.value.availability),
-              ...getGridItem("Skill Level: ", player.value.skillLevel),
-            ],
-          ),
-        )
-      ],
-    );
-  }).toList();
-}
-
 /// This is the stateful widget that the main application instantiates.
 class LeaderBoard extends StatefulWidget {
   const LeaderBoard({Key key}) : super(key: key);
@@ -142,7 +28,6 @@ class LeaderBoard extends StatefulWidget {
 
 /// This is the private State class that goes with LeaderBoard.
 class _LeaderBoardState extends State<LeaderBoard> {
-  List<ExpansionTile> _playerTiles = [];
   List<Player> allPlayers = [];
   Future<List<Player>> _futureGetPlayers;
 
@@ -165,12 +50,11 @@ class _LeaderBoardState extends State<LeaderBoard> {
             if (snapshot.hasError)
               return Center(child: Text('Error: ${snapshot.error}'));
             else {
-              this._playerTiles =
-                  generatePlayerItemList(snapshot.data, context);
               return SingleChildScrollView(
                 child: Container(
-                  child: _buildPanel(),
-                ),
+                    child: PlayerList(snapshot.data, (player) {
+                  return PlayerDetails(player);
+                })),
               );
             }
           }
@@ -194,17 +78,5 @@ class _LeaderBoardState extends State<LeaderBoard> {
             ),
           ],
         ));
-  }
-
-  Widget _buildPanel() {
-    return Column(
-      children: [
-        AppBar(
-          title: Text("Stonewall Tennis 2021 Leaderboard"),
-          centerTitle: true,
-        ),
-        ..._playerTiles,
-      ],
-    );
   }
 }

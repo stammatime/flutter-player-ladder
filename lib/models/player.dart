@@ -8,7 +8,8 @@ class Player {
       this.preferredCourtLocation = "",
       this.availability = "",
       this.skillLevel = "",
-      this.phone = ""});
+      this.phone = "",
+      this.rank = 99});
   String id;
   String name;
   String email;
@@ -16,6 +17,7 @@ class Player {
   String availability;
   String skillLevel;
   String phone;
+  int rank;
 
   factory Player.fromJson(Map<String, dynamic> json) {
     return Player(
@@ -25,6 +27,18 @@ class Player {
         preferredCourtLocation: json['preferredCourtLocation'],
         availability: json['availability'],
         skillLevel: json['skillLevel'],
-        phone: json['phone']);
+        phone: json['phone'],
+        rank: json['rank']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      "name": this.name,
+      'email': this.email,
+      'preferredCourtLocation': this.preferredCourtLocation,
+      'availability': this.availability,
+      'skillLevel': this.skillLevel,
+      'rank': this.rank
+    };
   }
 }
