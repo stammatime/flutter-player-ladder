@@ -27,8 +27,6 @@ generateEventRow({date, description, location, style}) {
                   }));
             }
 
-            // var data = await fetchPlayers();
-            // print(data.body);
             allData.players.forEach((p) => createPlayer(p));
           },
           child: Text('hi')),

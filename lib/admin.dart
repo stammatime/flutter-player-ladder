@@ -8,7 +8,6 @@ import './player_list.dart';
 import './models/playerData.dart' as data;
 
 Future<http.Response> createPlayer(Player p) {
-  print(jsonEncode(p));
   return http.post(
       Uri.https(
         'c2y956330l.execute-api.us-east-1.amazonaws.com',

@@ -36,7 +36,6 @@ class _PlayerListState extends State<PlayerList> {
 List<ExpansionTile> generatePlayerList(
     BuildContext context, List<Player> allPlayers, Function detailsWidget) {
   return allPlayers.map<ExpansionTile>((player) {
-    print(player.name);
     return ExpansionTile(
       title: Text("${player.rank} ${player.name}"),
       initiallyExpanded: player.name == "Cody Stammer" ? true : false,
